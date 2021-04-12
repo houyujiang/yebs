@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mornd.server.mapper.EmployeeMapper">
+
+    <!--通用查询映射结果-->
+    <resultMap id="baseResultMap" type="com.mornd.server.pojo.Employee">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="birthday" column="birthday"/>
+        <result property="idCard" column="id_card"/>
+        <result property="wedlock" column="wedlock"/>
+        <result property="nationId" column="nation_id"/>
+        <result property="nationPlace" column="nation_place"/>
+        <result property="politicId" column="politic_id"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+        <result property="departmentId" column="department_id"/>
+        <result property="jobLevelId" column="job_level_id"/>
+        <result property="posId" column="pos_id"/>
+        <result property="engageForm" column="engage_form"/>
+        <result property="tiptopDegree" column="tiptop_degree"/>
+        <result property="specialty" column="specialty"/>
+        <result property="school" column="school"/>
+        <result property="beginDate" column="begin_date"/>
+        <result property="workState" column="work_state"/>
+        <result property="workId" column="work_id"/>
+        <result property="contractTerm" column="contract_term"/>
+        <result property="conversionTime" column="conversion_time"/>
+        <result property="notWorkTract" column="not_work_tract"/>
+        <result property="beginContract" column="begin_contract"/>
+        <result property="endContract" column="end_contract"/>
+        <result property="workAge" column="work_age"/>
+        <result property="salaryId" column="salary_id"/>
+    </resultMap>
+
+    <resultMap id="getAllEmployees" type="com.mornd.server.pojo.Employee" extends="baseResultMap">
+        <association property="nation" javaType="com.mornd.server.pojo.Nation">
+            <id property="id" column="nid"/>
+            <result property="name" column="nname"/>
+        </association>
+        <association property="department" javaType="com.mornd.server.pojo.Department">
+            <id property="id" column="did"/>
+            <result property="name" column="dname"/>
+        </association>
+        <association property="joblevel" javaType="com.mornd.server.pojo.Joblevel">
+            <id property="id" column="jid"/>
+            <result property="name" column="jname"/>
+        </association>
+        <association property="politicsStatus" javaType="com.mornd.server.pojo.PoliticsStatus">
+            <id property="id" column="pid"/>
+            <result property="name" column="pname"/>
+        </association>
+        <association property="position" javaType="com.mornd.server.pojo.Position">
+            <id property="id" column="posid"/>
+            <result property="name" column="posname"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="getEmployeeWithSalary" type="com.mornd.server.pojo.Employee" extends="baseResultMap">
+        <association property="department" javaType="com.mornd.server.pojo.Department">
+            <id property="id" column="did"/>
+            <result property="name" column="dname"/>
+        </association>
+        <association property="salary" javaType="com.mornd.server.pojo.Salary">
+            <id property="id" column="sid"/>
+            <result property="name" column="sname"/>
+            <result property="bonus" column="sbonus"/>
+            <result property="basicSalary" column="sbasicsalary"/>
+            <result property="lunchSalary" column="slunch"/>
+            <result property="trafficSalary" column="straffic"/>
+            <result property="pensionBase" column="spensionbase"/>
+            <result property="pensionPer" column="spensionper"/>
+            <result property="createDate" column="screateDate"/>
+            <result property="medicalBase" column="smedicalbase"/>
+            <result property="medicalPer" column="smedicalper"/>
+            <result property="accumulationFundBase" column="saccumulationfundbase"/>
+            <result property="accumulationFundPer" column="saccumulationfundper"/>
+        </association>
+    </resultMap>
+
+    <!--根据条件查询员工（分页）-->
+    <select id="getAllEmployees" resultMap="getAllEmployees">
+        SELECT
+          e.*,
+          n.`id` AS nid,
+          n.`name` AS nname,
+          d.`id` AS did,
+          d.`name` AS dname,
+          j.`id` AS jid,
+          j.`name` AS jname,
+          p.`id` AS pid,
+          p.`name` AS pname,
+          pos.`id` AS posid,
+          pos.name AS posname
+        FROM
+          t_employee e,
+          t_nation n,
+          t_department d,
+          t_joblevel j,
+          t_politics_status p,
+          t_position pos
+        WHERE e.`nation_id` = n.`id`
+          AND e.`department_id` = d.`id`
+          AND e.`job_level_id` = j.`id`
+          AND e.`politic_id` = p.`id`
+          AND e.`pos_id` = pos.`id`
+          <if test="null != employeeVo.workId and '' != employeeVo.workId">
+              AND e.work_id like concat('%',#{employeeVo.workId},'%')
+          </if>
+          <if test="null != employeeVo.name and '' != employeeVo.name">
+              AND e.`name` LIKE CONCAT('%',#{employeeVo.name},'%')
+          </if>
+          <if test="null != employeeVo.gender and '' != employeeVo.gender">
+              and e.gender = #{employeeVo.gender}
+          </if>
+          <if test="null != employeeVo.idCard and '' != employeeVo.idCard">
+              and e.id_card like concat('%',#{employeeVo.idCard},'%')
+          </if>
+          <if test="null != employeeVo.wedlock and '' != employeeVo.wedlock">
+              and e.wedlock = #{employeeVo.wedlock}
+          </if>
+          <if test="null != employeeVo.nationPlace and '' != employeeVo.nationPlace">
+              and e.nation_place like concat('%',#{employeeVo.nationPlace},'%')
+          </if>
+          <if test="null != employeeVo.phone and '' != employeeVo.phone">
+              and e.phone like concat('%',#{employeeVo.phone},'%')
+          </if>
+          <if test="null != employeeVo.address and '' != employeeVo.address">
+              and e.address like concat('%',#{employeeVo.address},'%')
+          </if>
+          <if test="null != employeeVo.departmentId">
+              AND e.`department_id` = #{employeeVo.departmentId}
+          </if>
+          <if test="null != employeeVo.politicId">
+              AND e.`politic_id` = #{employeeVo.politicId}
+          </if>
+          <if test="null != employeeVo.nationId">
+              AND e.`nation_id` = #{employeeVo.nationId}
+          </if>
+          <if test="null != employeeVo.jobLevelId">
+              AND e.`job_level_id` = #{employeeVo.jobLevelId}
+          </if>
+          <if test="null != employeeVo.posId">
+              AND e.`pos_id` = #{employeeVo.posId}
+          </if>
+          <if test="null != employeeVo.engageForm and '' != employeeVo.engageForm">
+              AND e.`engage_form` = #{employeeVo.engageForm}
+          </if>
+          <if test="null != employeeVo.beginDateScope and 2 == employeeVo.beginDateScope.length">
+              AND e.`begin_contract` BETWEEN #{employeeVo.beginDateScope[0]} AND #{employeeVo.beginDateScope[1]}
+          </if>
+          ORDER BY e.`id` DESC
+    </select>
+
+    <!--根据id查询详细员工详细-->
+    <select id="getEmployeeById" resultMap="getAllEmployees">
+        SELECT
+          e.*,
+          n.`id` AS nid,
+          n.`name` AS nname,
+          d.`id` AS did,
+          d.`name` AS dname,
+          j.`id` AS jid,
+          j.`name` AS jname,
+          p.`id` AS pid,
+          p.`name` AS pname,
+          pos.`id` AS posid,
+          pos.name AS posname
+        FROM
+          t_employee e,
+          t_nation n,
+          t_department d,
+          t_joblevel j,
+          t_politics_status p,
+          t_position pos
+        WHERE e.`nation_id` = n.`id`
+          AND e.`department_id` = d.`id`
+          AND e.`job_level_id` = j.`id`
+          AND e.`politic_id` = p.`id`
+          AND e.`pos_id` = pos.`id`
+          <if test="null != id">
+              AND e.id = #{id}
+          </if>
+          ORDER BY e.id
+    </select>
+
+    <!--获取员工账套-->
+    <select id="getEmployeeWithSalary" resultMap="getEmployeeWithSalary">
+        SELECT
+        e.`id`,
+        e.`name`,
+        e.`work_id`,
+        e.`gender`,
+        e.`birthday`,
+        d.id AS did,
+        d.`name` AS dname,
+        s.`id` AS sid,
+        s.`name` AS sname,
+        s.`bonus` AS sbonus,
+        s.`basic_salary` sbasicsalary,
+        s.`lunch_salary` AS slunch,
+        s.`traffic_salary` AS straffic,
+        s.create_date as screatedate,
+        s.`pension_base` AS spensionbase,
+        s.`pension_per` AS spensionper,
+        s.create_date as screateDate,
+        s.`medical_base` AS smedicalbase,
+        s.`medical_per` AS smedicalper,
+        s.`accumulation_fund_base` AS saccumulationfundbase,
+        s.`accumulation_fund_per` AS saccumulationfundper
+        FROM t_employee e
+        LEFT JOIN t_salary s ON e.`salary_id` = s.`id`
+        LEFT JOIN t_department d ON e.`department_id` = d.`id`
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="null != name and '' != name">
+                AND e.`name` LIKE concat('%',#{name},'%')
+            </if>
+            <if test="null != workId and '' != workId">
+                AND e.`work_id` LIKE concat('%',#{workId},'%')
+            </if>
+        </trim>
+        ORDER BY e.`id`
+    </select>
+
+    <!--根据salaryId删除员工信息-->
+    <delete id="removeBySaiaryId">
+        delete from t_employee where salary_id = #{id}
+    </delete>
+</mapper>
